@@ -1,13 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NewClaimDialog from "./components/NewClaimDialogBox";
+import { listClaims, type Claim } from "../lib/api/api";
 
 export default function App() {
   const [openNew, setOpenNew] = useState(false);
+  const [claims, setClaims] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Claim | null>(null);
 
-  function handleCreate(data: { policy_holder: string; policy_number: string }) {
-    // For now just log; later we’ll POST to backend and refresh list
-    console.log("create claim:", data);
-  }
+  useEffect(() => {
+    async function fetchClaims() {
+      try {
+        const data = await listClaims();
+        console.log("DATA: ", data);
+        setClaims(data);
+      } catch (err: any) {
+        setError(err.message || "Failed to load claims");
+      }
+    }
+    fetchClaims();
+  }, []);
+
+  const openClaims = claims.filter((c) => c.status === "Open").length;
+  const inDocCollection = claims.filter((c) => c.stage === "DocumentCollection").length;
+  const inSettlementOrClosure = claims.filter(
+    (c) => c.stage === "Settlement" || c.stage === "PaymentProcessing" || c.stage === "CaseClosure"
+  ).length;
+
   return (
     <div className="layout">
       {/* Sidebar */}
@@ -50,7 +69,7 @@ export default function App() {
         </div>
 
         {/* Modal */}
-        <NewClaimDialog open={openNew} onClose={() => setOpenNew(false)} onCreate={handleCreate} />
+        <NewClaimDialog open={openNew} onClose={() => setOpenNew(false)} />
 
         {/* Content */}
         <div className="container" style={{ padding: 24 }}>
@@ -58,15 +77,15 @@ export default function App() {
           <div className="kpi-row">
             <div className="kpi">
               <div className="label">Open claims</div>
-              <div className="value mono">0</div>
+              <div className="value mono">{openClaims}</div>
             </div>
             <div className="kpi">
               <div className="label">In document collection</div>
-              <div className="value mono">0</div>
+              <div className="value mono">{inDocCollection}</div>
             </div>
             <div className="kpi">
               <div className="label">In settlement / closure</div>
-              <div className="value mono">0</div>
+              <div className="value mono">{inSettlementOrClosure}</div>
             </div>
           </div>
 
@@ -101,13 +120,36 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="table-empty" colSpan={4}>
-                    No records
-                  </td>
-                </tr>
+                {claims.length === 0 ? (
+                  <tr>
+                    <td className="table-empty" colSpan={4}>
+                      No Records
+                    </td>
+                  </tr>
+                ) : (
+                  claims.map((claim) => (
+                    <tr key={claim.id} onClick={() => setSelected(claim)} style={{ cursor: "pointer" }}>
+                      <td>{claim.policy_holder}</td>
+                      <td>{claim.policy_number}</td>
+                      <td>{claim.stage}</td>
+                      <td>
+                        {claim.created_at
+                          ? new Date(
+                              // ensure it parses even if the backend returns "YYYY-MM-DD HH:mm:ss+01"
+                              String(claim.created_at).replace(" ", "T")
+                            ).toLocaleString()
+                          : "-"}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
+
+            {/* Drawer */}
+            {/* { selected && (
+
+            )} */}
 
             <div className="card-footer text-sm">
               <button className="pill" disabled>
