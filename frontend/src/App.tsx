@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import NewClaimDialog from "./components/NewClaimDialogBox";
+import ClaimDrawer from "./components/ClaimDrawer";
 import { listClaims, type Claim } from "../lib/api/api";
 
 export default function App() {
@@ -133,7 +134,7 @@ export default function App() {
                       <td>{claim.policy_number}</td>
                       <td>{claim.stage}</td>
                       <td>
-                        {claim.created_at
+                        {claim.updated_at
                           ? new Date(
                               // ensure it parses even if the backend returns "YYYY-MM-DD HH:mm:ss+01"
                               String(claim.created_at).replace(" ", "T")
@@ -163,6 +164,17 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {selected && (
+        <ClaimDrawer
+          claim={selected}
+          onClose={() => setSelected(null)}
+          onChanged={(updated) => {
+            setClaims((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+            setSelected(updated);
+          }}
+        />
+      )}
     </div>
   );
 }
