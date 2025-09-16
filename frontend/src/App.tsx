@@ -13,7 +13,6 @@ export default function App() {
     async function fetchClaims() {
       try {
         const data = await listClaims();
-        console.log("DATA: ", data);
         setClaims(data);
       } catch (err: any) {
         setError(err.message || "Failed to load claims");
