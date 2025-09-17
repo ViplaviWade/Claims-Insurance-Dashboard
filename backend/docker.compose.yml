@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+    db: 
+        image: postgres:16
+        environment: 
+            POSTGRES_USER: claims
+            POSTGRES_PASSWORD: claims
+            POSTGRES_DB: claims_db
+        ports:
+            - "5432:5432"
+        volumes: 
+            pgdata:/var/lib/postgresql/data
+    pgadmin:
+        image: dpage/pgadmin4:8
+        environment:
+            - PGADMIN_DEFAULT_EMAIL= admin@local
+            - GADMIN_DEFAULT_PASSWORD: admin
+        ports:
+            - "5050: 80"
+        volumes:
+            pgdata:
