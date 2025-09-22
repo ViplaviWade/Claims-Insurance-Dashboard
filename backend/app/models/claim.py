@@ -10,7 +10,7 @@ class ClaimStage(str, enum.Enum):
     Review = "Review"
     Assessment = "Assessment"
     Approval = "Approval"
-    Negotiation = "Negitation"
+    Negotiation = "Negotiation"
     Settlement = "Settlement"
     PaymentProcessing = "PaymentProcessing"
     QualityAssurance = "QualityAssurance"
