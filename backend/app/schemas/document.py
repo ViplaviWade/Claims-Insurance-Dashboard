@@ -56,5 +56,10 @@ class ClaimDocumentOut(BaseModel):
     filename: str
     label: str | None
     uploaded_at: datetime
+    summary: Optional[str] = None
+    doc_type: Optional[str] = None
 
     model_config = {"from_attributes": True}
+    
+    # class Config:
+    #     orm_mode = True
